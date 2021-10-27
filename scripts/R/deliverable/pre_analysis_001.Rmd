@@ -1,0 +1,36 @@
+---
+title: "Pre-Modeling Analysis"
+date: "10/26/2021"
+author: ""
+output: pdf_document
+indent: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message=FALSE)
+library(tidyverse)
+library(haven)
+library(gbm)
+library(kableExtra)
+options(scipen=999)
+```
+
+#Exploratory Data Analyses    
+
+```{r}
+dat <- readRDS("health_retirement/processed_001HRS.rds")
+```
+
+
+### Missing Data Analysis:  
+  
+```{r}
+NAdat <- data.frame(colMeans(is.na(dat)))
+NAdat$variable <- rownames(NAdat)
+NAdat <- NAdat[order(-NAdat$colMeans.is.na.dat..),]
+colnames(NAdat) <- c( "proportion_missing","variable")
+rownames(NAdat) <- NULL
+knitr::kable(NAdat[,c("variable","proportion_missing")], digits = 3) %>% #invoke kable
+  kableExtra::kable_styling(position = "center", full_width = F)
+```
+
