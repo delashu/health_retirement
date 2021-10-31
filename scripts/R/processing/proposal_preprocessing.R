@@ -212,7 +212,14 @@ mydat <- dat %>%
   #we now remove the values that have lots of missingness and are shown to be seen in other variables
   select(-heart_attack, -amount_earn_when_left, -age_plan_stop_wrk, 
          -times_fallen, -weeks_worked_py, -num_lifeinsur_policies, -alc_days) %>% 
+  #remove variables that are used to compute the outcome variable
+  select(-c(stocks_mf, bonds, savings, cds, vehicles, 
+            other_savings, pension,home_value, second_home_value,mobile_home_value, mortgage,
+            assets, housing_assets,debts, credit_card_debt)) %>% 
   data.frame()
 
 #attribute removal: 
 mydat[] <- lapply(mydat, function(x) { attributes(x) <- NULL; x })
+#turn all character variables into factors: 
+mydat[sapply(mydat, is.character)] <- lapply(mydat[sapply(mydat, is.character)], 
+                                         as.factor)
