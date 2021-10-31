@@ -95,9 +95,10 @@ mydat <- dat %>%
                                              ifelse(QC257 == 8 | QC257 == 9, NA, QC257)))),
          
          depression = ifelse(QC271 == 1, "Yes",
-                             ifelse(QC271 ==4, "No",
-                                    ifelse(QC271 ==5, "No",
-                                           ifelse(QC271 == 8 | QC271 == 9, NA, QC271)))),
+                             ifelse(QC271 ==6, "Had it Before Not Now",
+                                 ifelse(QC271 ==4, "No",
+                                        ifelse(QC271 ==5, "No",
+                                               ifelse(QC271 == 8 | QC271 == 9, NA, QC271))))),
          times_fallen = ifelse(QC080 == 99 | QC080 ==98, NA, QC080), 
          alc_days = ifelse(QC129 == 9 | QC129 ==8, NA, QC129),
          days_in_bed = ifelse(QC229 == 98 | QC229 ==99, NA, QC229), 
@@ -182,7 +183,7 @@ mydat <- dat %>%
          pension_9= ifelse(QJ2W009_9 ==  99999998 | QJ2W009_9 == 99999999, NA, QJ2W009_9),
          pension_10= ifelse(QJ2W009_10 ==  99999998 | QJ2W009_10 == 99999999, NA, QJ2W009_10),
          pension = sum(pension_1, pension_2,pension_3,pension_4,pension_5,
-                       pension_6,pension_7,pension_8,pension_9,pension_10),
+                       pension_6,pension_7,pension_8,pension_9,pension_10, na.rm = TRUE),
          home_value = ifelse(QH020 ==  9999999998 | QH020 == 9999999999, NA, QH020),
          mobile_home_value = ifelse(QH016 ==  99999998 | QH016 == 99999999, NA, QH016),
          second_home_value = ifelse(QH166 ==  9999999998 | QH166 == 9999999999, NA, QH166),
@@ -206,7 +207,4 @@ mydat <- dat %>%
                       na.rm = TRUE),
          housing_assets = sum(home_value, second_home_value,mobile_home_value, -mortgage, 
                               na.rm = TRUE),
-         net_assets = assets + housing_assets, 
-         #there are individuals with negative assets, which is not possible: 
-         #we will floor this to 0
-         net_assets = ifelse(net_assets<0, 0, net_assets))
+         net_assets = assets + housing_assets)
