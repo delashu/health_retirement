@@ -207,4 +207,8 @@ mydat <- dat %>%
                       na.rm = TRUE),
          housing_assets = sum(home_value, second_home_value,mobile_home_value, -mortgage, 
                               na.rm = TRUE),
-         net_assets = assets + housing_assets)
+         net_assets = assets + housing_assets) %>% 
+  #we now remove the values that have lots of missingness and are shown to be seen in other variables
+  select(-heart_attack, -amount_earn_when_left, -age_plan_stop_wrk, 
+         -times_fallen, -weeks_worked_py, -num_lifeinsur_policies, -alc_days)
+

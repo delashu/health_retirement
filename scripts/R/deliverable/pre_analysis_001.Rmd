@@ -34,3 +34,20 @@ knitr::kable(NAdat[,c("variable","proportion_missing")], digits = 3) %>% #invoke
   kableExtra::kable_styling(position = "center", full_width = F)
 ```
 
+### Complete case row proportion:  
+  
+```{r}
+completedat <- dat[complete.cases(dat[,c("retirement", "sex","age","children","marital_status",
+                                         "life_satisfaction", "health_rate","high_BP","diabetes",
+                                         "cancer","depression","days_in_bed","memory","lonely_pw",
+                                         "enjoy_life_pw","job_status","help_friends_py","have_friends",
+                                         "difficulty_managing_mny","own_rent_home","social_security",
+                                         "medicare","follow_stockmarket","life_insurance",
+                                         "net_assets")]),]
+nrow(completedat) / nrow(dat)
+
+```
+  
+  A complete case data set provides ~ 72% of the entire data.  
+  We lose ~ 28% of data.  
+  
