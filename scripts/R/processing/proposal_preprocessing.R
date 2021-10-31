@@ -116,7 +116,7 @@ mydat <- dat %>%
                                        ifelse(QD115 == 8 | QD115 == 9, NA, QD115))),
          
          help_friends_py = ifelse(QG198 == 1, "Yes",
-                                  ifelse(QG198 ==4, "No",
+                                  ifelse(QG198 ==5, "No",
                                          ifelse(QG198 == 8 | QG198 == 9, NA, QG198))),
          have_friends = ifelse(QG097 == 1, "Yes",
                                ifelse(QG097 ==5, "No",
@@ -211,4 +211,3 @@ mydat <- dat %>%
   #we now remove the values that have lots of missingness and are shown to be seen in other variables
   select(-heart_attack, -amount_earn_when_left, -age_plan_stop_wrk, 
          -times_fallen, -weeks_worked_py, -num_lifeinsur_policies, -alc_days)
-
