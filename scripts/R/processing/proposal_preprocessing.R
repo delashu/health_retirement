@@ -1,10 +1,8 @@
 #load libraries
-library(arsenal)
 library(dplyr)
-library(ggplot2)
-library(gridExtra)
 library(haven)
 library(patchwork)
+library(caTools)
 options(scipen = 999)
 
 "
@@ -223,3 +221,33 @@ mydat[] <- lapply(mydat, function(x) { attributes(x) <- NULL; x })
 #turn all character variables into factors: 
 mydat[sapply(mydat, is.character)] <- lapply(mydat[sapply(mydat, is.character)], 
                                          as.factor)
+
+
+############## Training & Test Split ##############
+
+#Note that the data has 16,309 rows
+#Create a test data set with 20% of these rows (3262 rows)
+#The test data set must include complete cases. 
+#The remaining data will be imputed
+set.seed(11+03+21) 
+
+all_rownum <- nrow(mydat)
+test_rownums <- ceiling(all_rownum*0.2)
+
+#data with complete cases:
+data_complete <- mydat[complete.cases(mydat), ]
+
+#calculate ratio percentage with new rows
+#math to solve percentage
+new_p <- 1 - (test_rownums / nrow(data_complete))
+#find test set
+sample <- sample.split(data_complete$net_assets, SplitRatio = new_p)
+
+#define test data
+test  <- subset(data_complete, sample == FALSE)
+
+#define training data by 
+#rbind'ing the rest of the complete cases with "sample == TRUE"
+pre_train <- rbind(mydat[!complete.cases(mydat), ],
+               subset(data_complete, sample == TRUE))
+
