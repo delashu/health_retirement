@@ -1,7 +1,8 @@
 library(dplyr)
 library(mice)
+set.seed(11+03+21)
 #read in data to perform 'mice' on  
-dat <- readRDS("processed_001HRS.rds")
+dat <- readRDS("training_001HRS.rds")
 
 
 '
@@ -20,7 +21,7 @@ complete_dat <- complete(imputation_one)
 
 #check for missingness after imputation
 sapply(complete_dat, function(x) sum(is.na(x)))
-  #saveRDS(complete_dat, file="HRSdat_mice_rf01.rds")
+saveRDS(complete_dat, file="HRSdat_mice_rf01.rds")
 
 
 imputation_cart <- mice(dat, m = 5, method = "cart")
@@ -29,7 +30,7 @@ complete_dat_cart <- complete(imputation_cart)
 
 #check for missingness after imputation
 sapply(complete_dat_cart, function(x) sum(is.na(x)))
-  #saveRDS(complete_dat_cart, file="HRSdat_mice_cart01.rds")
+saveRDS(complete_dat_cart, file="HRSdat_mice_cart01.rds")
 
 
 
@@ -44,4 +45,8 @@ The Classification and Regression Tree (CART)/Random Forest method is used to im
 CART is selected for its robustness and ability to impute data on continuous and categorical variables. 
 Furthermore, the data shows complex colinearity, interactions, non-linear relationships, and multimodal distributions.  
 CART was preferred over traditional linear and logistic regression MICE techniques to handle these issues. 
+
+Resources: 
+https://www.bmj.com/content/338/bmj.b2393
+https://stats.stackexchange.com/questions/462507/how-to-decide-whether-missing-values-are-mar-mcar-or-mnar
 "
