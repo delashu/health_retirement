@@ -1,4 +1,5 @@
 library(MASS)
+library(quantreg)
 
 #multiple linear regression script
 dat <- readRDS(file = "HRSdat_mice_rf01.rds")
@@ -25,3 +26,10 @@ plot(fit2,1, main = c("naive multiple linear regression"))
 #################### Robust Regression ####################
 robust_fit1 <- rlm(net_assets ~ ., data = dat)
 summary(robust_fit1)
+
+
+
+
+#################### Quantile Regression ####################
+quant_fit1 <- rq(net_assets ~ ., data = dat)
+summary(quant_fit1)
