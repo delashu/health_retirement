@@ -16,7 +16,7 @@ The raw SAS file was read into R and saved as an RDS file.
 Read in the file below
 "
 
-dat <- readRDS(file="h18e1a_SAS/h18e1a.rds")
+dat <- readRDS(file="../h18e1a_SAS/h18e1a.rds")
 
 
 #Data processing
@@ -212,7 +212,8 @@ mydat <- dat %>%
   ungroup() %>%
   #we now remove the values that have lots of missingness and are shown to be seen in other variables
   select(-heart_attack, -amount_earn_when_left, -age_plan_stop_wrk, 
-         -times_fallen, -weeks_worked_py, -num_lifeinsur_policies, -alc_days) %>% 
+         -times_fallen, -weeks_worked_py, -num_lifeinsur_policies, -alc_days, 
+         -job_status) %>% 
   #remove variables that are used to compute the outcome variable
   select(-c(stocks_mf, bonds, savings, cds, vehicles, 
             other_savings, pension,home_value, second_home_value,mobile_home_value, mortgage,
@@ -236,14 +237,13 @@ mydat[sapply(mydat, is.character)] <- lapply(mydat[sapply(mydat, is.character)],
 #Create a test data set with 20% of these rows (3262 rows)
 #The test data set must include complete cases. 
 #The remaining data will be imputed
-set.seed(11+03+21) 
+set.seed(11+05+21) 
 
 all_rownum <- nrow(mydat)
 test_rownums <- ceiling(all_rownum*0.2)
 
 #data with complete cases:
 data_complete <- mydat[complete.cases(mydat), ]
-rownames(data_complete) <- NULL
 
 #calculate ratio percentage with new rows
 #math to solve percentage
