@@ -180,15 +180,12 @@ mydat <- dat %>%
          pension_8= ifelse(QJ2W009_8 ==  99999998 | QJ2W009_8 == 99999999, NA, QJ2W009_8),
          pension_9= ifelse(QJ2W009_9 ==  99999998 | QJ2W009_9 == 99999999, NA, QJ2W009_9),
          pension_10= ifelse(QJ2W009_10 ==  99999998 | QJ2W009_10 == 99999999, NA, QJ2W009_10),
-         pension = sum(pension_1, pension_2,pension_3,pension_4,pension_5,
-                       pension_6,pension_7,pension_8,pension_9,pension_10, na.rm = TRUE),
          home_value = ifelse(QH020 ==  9999999998 | QH020 == 9999999999, NA, QH020),
          mobile_home_value = ifelse(QH016 ==  99999998 | QH016 == 99999999, NA, QH016),
          second_home_value = ifelse(QH166 ==  9999999998 | QH166 == 9999999999, NA, QH166),
          mortgage = ifelse(QH032 ==  99999998 | QH032 == 99999999, NA, QH032), 
          debts = ifelse(QQ478 == 9999998 | QQ478 == 9999999, NA, QQ478),
          credit_card_debt = ifelse(QQ519 == 9999998 | QQ519 == 9999999, NA, QQ519)) %>% 
-  
   select(retirement, sex, age, children, marital_status, 
          life_satisfaction, health_rate, high_BP, diabetes, 
          cancer, heart_attack, depression, times_fallen, alc_days, days_in_bed, 
@@ -197,23 +194,33 @@ mydat <- dat %>%
          amount_earn_when_left, difficulty_managing_mny, 
          own_rent_home, age_plan_stop_wrk, social_security, medicare, follow_stockmarket, life_insurance, 
          num_lifeinsur_policies, 
-         stocks_mf, bonds, savings, cds, vehicles, other_savings, pension, home_value, mobile_home_value, 
-         second_home_value, mortgage, debts, credit_card_debt) %>%
+         stocks_mf, bonds, savings, cds, vehicles, other_savings, home_value, mobile_home_value, 
+         second_home_value, mortgage, debts, credit_card_debt, 
+         pension_1, pension_2,pension_3,pension_4,pension_5,
+         pension_6,pension_7,pension_8,pension_9,pension_10) %>%
   rowwise() %>% 
-  mutate(assets = sum(stocks_mf, bonds, savings, cds, vehicles, 
+  mutate(
+         
+         pension = sum(pension_1, pension_2,pension_3,pension_4,pension_5,
+                       pension_6,pension_7,pension_8,pension_9,pension_10, na.rm = TRUE),
+         assets = sum(stocks_mf, bonds, savings, cds, vehicles, 
                       other_savings, pension, 
                       na.rm = TRUE),
          housing_assets = sum(home_value, second_home_value,mobile_home_value, -mortgage, 
                               na.rm = TRUE),
-         net_assets = assets + housing_assets) %>% 
-  ungroup() %>% 
+         net_assets = assets + housing_assets + pension) %>% 
+  ungroup() %>%
   #we now remove the values that have lots of missingness and are shown to be seen in other variables
   select(-heart_attack, -amount_earn_when_left, -age_plan_stop_wrk, 
          -times_fallen, -weeks_worked_py, -num_lifeinsur_policies, -alc_days) %>% 
   #remove variables that are used to compute the outcome variable
   select(-c(stocks_mf, bonds, savings, cds, vehicles, 
             other_savings, pension,home_value, second_home_value,mobile_home_value, mortgage,
-            assets, housing_assets,debts, credit_card_debt)) %>% 
+            assets, housing_assets,debts, credit_card_debt,
+            pension_1, pension_2,pension_3,pension_4,pension_5,
+            pension_6,pension_7,pension_8,pension_9,pension_10)) %>% 
+  data.frame() %>% 
+  mutate(net_assets = ifelse(net_assets <0, 0, net_assets)) %>% 
   data.frame()
 
 #attribute removal: 
@@ -236,10 +243,13 @@ test_rownums <- ceiling(all_rownum*0.2)
 
 #data with complete cases:
 data_complete <- mydat[complete.cases(mydat), ]
+rownames(data_complete) <- NULL
 
 #calculate ratio percentage with new rows
 #math to solve percentage
 new_p <- 1 - (test_rownums / nrow(data_complete))
+new_p <- round(new_p, 1)
+
 #find test set
 sample <- sample.split(data_complete$net_assets, SplitRatio = new_p)
 
