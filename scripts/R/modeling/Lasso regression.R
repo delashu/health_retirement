@@ -2,7 +2,7 @@
 test <- readRDS(file = "test_001HRS.rds")
 train <- readRDS(file="HRSdat_mice_rf01.rds")
 
-#Aim 1 build a logistic regression model to predict retirement and non-retirement.
+#Aim 1 build a logistic regression model to predict retirement and non-retirement unbalanced.
 table(train$retirement)
 model_complete <- glm(retirement ~ ., family=binomial(link='logit'), data=train)
 
