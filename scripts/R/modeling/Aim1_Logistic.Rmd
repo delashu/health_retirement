@@ -1,0 +1,88 @@
+---
+title: "Aim 1. Logistic Regression"
+author: "Caihan Wang"
+date: "11/7/2021"
+output: html_document
+---
+
+```{r}
+# Preparation
+setwd("~/Desktop/duke courses/707/aging project")
+library(tidyverse)
+```
+
+```{r}
+# Read in Dataset
+test <- readRDS("test_001HRS.rds")
+train <- readRDS("HRSdat_mice_rf01.rds")
+table(train$retirement) # unbalanced
+```
+
+```{r}
+# Resample training data to solve unbalance
+set.seed(11/7/2021)
+train_Re <- train %>% filter(retirement == "Retired")
+train_No <- train %>% filter(retirement == "Not Retired")
+train_Re_new <- train_Re[sample(nrow(train_Re), 4761),]
+train_new <- rbind(train_Re_new, train_No)
+```
+
+```{r}
+# first fit logistic model
+mylogit <- glm(retirement ~ ., 
+               data = train_new, family = "binomial")
+summary(mylogit)
+```
+
+```{r}
+# Reduce logistic model, choose some significant variables
+model_reduce <- glm(retirement ~ age+ life_satisfaction + health_rate + high_BP+cancer+depression + days_in_bed + difficulty_managing_mny+ own_rent_home+social_security+medicare+follow_stockmarket+life_insurance,
+                    family=binomial(link='logit'),
+                    data=train_new)
+summary(model_reduce)
+```
+
+```{r}
+# Stepwise logistic model
+step(model_reduce)
+```
+
+```{r}
+# result of stepwise logistic model
+model_step <- glm(formula = retirement ~ age + life_satisfaction + health_rate + 
+    high_BP + cancer + depression + days_in_bed + difficulty_managing_mny + 
+    own_rent_home + social_security + medicare + life_insurance, 
+    family = binomial(link = "logit"), data = train_new)
+summary(model_step)
+```
+
+```{r}
+# lasso model made by Ashley
+model_lasso <- glm(retirement ~ age+health_rate+high_BP+depression+
+                     days_in_bed+social_security+medicare+life_insurance, family=binomial(link='logit'), data=train)
+summary(model_lasso)
+```
+
+
+```{r}
+# Predict using test dataset by stepwise model
+result = data.frame(predict(model_step, test, interval = "prediction",type="response"))
+colnames(result) <- "Response"
+result$Output[result$Response > 0.5] <- "Retired"
+result$Output[result$Response <= 0.5] <- "Not Retired"
+result <- cbind(result, test$retirement)
+table(result$Output, result$`test$retirement`) # accuracy = 0.873
+```
+
+```{r}
+# Predict using test dataset by lasso model (Asheley)
+result_lasso = data.frame(predict(model_lasso, test, interval = "prediction",type="response"))
+colnames(result_lasso) <- "Response"
+result_lasso$Output[result_lasso$Response > 0.5] <- "Retired"
+result_lasso$Output[result_lasso$Response <= 0.5] <- "Not Retired"
+result_lasso <- cbind(result_lasso, test$retirement)
+table(result_lasso$Output, result_lasso$`test$retirement`) # accuracy = 0.877
+```
+
+
+
