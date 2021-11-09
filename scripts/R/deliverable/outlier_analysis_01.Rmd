@@ -1,0 +1,59 @@
+---
+title: "Outlier Analysis"
+author: "Shusaku Asai"
+date: "11/09/2021"
+output: html_document
+---
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+library(tidyverse)
+library(caret)
+library(glmnet)
+library(rpart)
+library(randomForest)
+options(scipen = 999)
+```
+
+```{r, echo=FALSE}
+dat <- readRDS("../../../training_001HRS_complete.rds")
+```
+
+#### Data Specifications:   
+16,309 Observations
+
+### Summary of Net Assets   
+
+```{r, echo = FALSE}
+net <- dat$net_assets
+summary(net)
+```
+
+  
+
+#### Individuals with net assets > $100 million
+```{r, echo=TRUE}
+length(which(net > 100000000))
+```
+`r 573/16309` is proportion of individuals with more than $100 million in net assets  
+
+
+
+### Top Net Assets   
+```{r}
+tops <- data.frame(dat[order(-dat$net_assets), "net_assets"])
+colnames(tops) <- c("net_assets")
+DT::datatable(head(tops,30))
+```
+
+
+
+
+### Plots of Net Assets   
+  
+```{r, echo = FALSE, fig.width=10, fig.height=8}
+par(mfrow = c(1,2))
+hist(net)
+boxplot(net)
+```
+
+

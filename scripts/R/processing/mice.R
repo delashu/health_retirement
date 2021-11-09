@@ -1,9 +1,11 @@
 library(dplyr)
 library(mice)
 set.seed(11+03+21)
-#read in data to perform 'mice' on  
-dat <- readRDS("training_001HRS.rds")
+#read in data to perform 'mice' POST SPLIT  
+dat <- readRDS("/home/guest/sem_3/707/health_retirement/training_001HRS.rds")
 
+#read in data to perform 'mice' PRE SPLIT
+dat_comp <- readRDS("/home/guest/sem_3/707/health_retirement/training_001HRS_complete.rds")
 
 '
 We assume that data is Missing at Random (MAR)
@@ -14,6 +16,15 @@ https://cran.r-project.org/web/packages/mice/mice.pdf
 #check for missingness before imputation
 sapply(dat, function(x) sum(is.na(x)))
 
+sapply(dat_comp, function(x) sum(is.na(x)))
+
+
+all_impute <- mice(dat_comp, m = 5, method = "rf")
+complete_all_dat <- complete(all_impute)
+
+#saveRDS(complete_all_dat, file="HRSdat_presplit_mice_rf01.rds")
+
+
 
 imputation_one <- mice(dat, m = 5, method = "rf")
 complete_dat <- complete(imputation_one)
@@ -21,7 +32,7 @@ complete_dat <- complete(imputation_one)
 
 #check for missingness after imputation
 sapply(complete_dat, function(x) sum(is.na(x)))
-saveRDS(complete_dat, file="HRSdat_mice_rf01.rds")
+#saveRDS(complete_dat, file="HRSdat_mice_rf01.rds")
 
 
 imputation_cart <- mice(dat, m = 5, method = "cart")
@@ -30,7 +41,7 @@ complete_dat_cart <- complete(imputation_cart)
 
 #check for missingness after imputation
 sapply(complete_dat_cart, function(x) sum(is.na(x)))
-saveRDS(complete_dat_cart, file="HRSdat_mice_cart01.rds")
+#saveRDS(complete_dat_cart, file="HRSdat_mice_cart01.rds")
 
 
 
