@@ -7,10 +7,6 @@ output: html_document
 
 ```{r, warning=FALSE, message=FALSE, echo=FALSE}
 library(tidyverse)
-library(caret)
-library(glmnet)
-library(rpart)
-library(randomForest)
 options(scipen = 999)
 ```
 
@@ -55,5 +51,15 @@ par(mfrow = c(1,2))
 hist(net)
 boxplot(net)
 ```
+
+
+
+### Determine variables most correlated for spline:  
+```{r}
+numdat <- dat[,c("net_assets", "age", "days_in_bed", "children")]
+plot(numdat, pch = 16, cex = 0.4)
+```
+
+From the correlated scatterplot, we see that days_in_bed may be a good proxy for creating a spline regression.  
 
 

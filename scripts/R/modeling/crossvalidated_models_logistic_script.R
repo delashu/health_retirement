@@ -3,6 +3,8 @@ library(caret)
 library(glmnet)
 library(rpart)
 library(randomForest)
+library(ipred)   
+#library(e1071)
 options(scipen = 999)
 
 set.seed(11+8+2021)
@@ -24,7 +26,9 @@ lasso_LSE_vec <- baseframe
 lasso_min_vec <- baseframe
 rpart_vec <- baseframe
 tree_vec <- baseframe
-#iterate through folds and fit models
+LDA_vec <- baseframe
+bagg_vec <- baseframe
+
 
 for (i in 1:length(idx)) {
   ################ set up k-fold training and test sets
@@ -75,7 +79,13 @@ for (i in 1:length(idx)) {
   rpart_fit  <- rpart(retirement ~ ., data = train_dat,method = "class")
   #regression tree fit: 
   tree_fit <- randomForest(retirement ~ ., data = train_dat,method = "class")
-  
+  #bagging method fit
+  bagg_fit <-bagging(retirement ~ ., data = train_dat, coob = TRUE)
+  #LDA fit 
+  lda_fit <- MASS::lda(retirement ~ ., data = train_dat)
+  #SVM fit 
+  #    svm_fit <- svm(Y~., data = X, kernel = "linear", scale = FALSE)
+  #stacking fit
   
   
   ################ Predictions
@@ -89,6 +99,8 @@ for (i in 1:length(idx)) {
                         type="class")
   lasso_LSE_predict <- predict(lasso_LSE_model,x_test_mat,type="class")
   lasso_min_predict <- predict(lasso_min_model,x_test_mat,type="class")
+  bagg_pred <- predict(bagg_fit, test_dat, type = "class")
+  lda_pred<- predict(lda_fit, test_dat, type = "class")[["class"]]
   
   
   ################ Evaluation Metrics
@@ -99,6 +111,8 @@ for (i in 1:length(idx)) {
   lasso_min_mat  <-confusionMatrix(factor(lasso_min_predict), factor(test_dat$retirement))
   rpart_mat <-confusionMatrix(factor(rpart_pred), factor(test_dat$retirement))
   tree_mat <-confusionMatrix(factor(tree_pred), factor(test_dat$retirement))
+  bagg_mat <- confusionMatrix(factor(bagg_pred), factor(test_dat$retirement))
+  lda_mat <- confusionMatrix(factor(lda_pred), factor(test_dat$retirement))
   
   ################ Vectorization
   logistic_metrics <- data.frame(c(log_mat$overall, log_mat$byClass))
@@ -113,7 +127,10 @@ for (i in 1:length(idx)) {
   names(rpart_metrics) <- paste0("fold_",i)
   tree_metrics <- data.frame(c(tree_mat$overall, tree_mat$byClass))
   names(tree_metrics) <- paste0("fold_",i)
-  
+  bagg_metrics <- data.frame(c(bagg_mat$overall, bagg_mat$byClass))
+  names(bagg_metrics) <- paste0("fold_",i)
+  lda_metrics <- data.frame(c(lda_mat$overall, lda_mat$byClass))
+  names(lda_metrics) <- paste0("fold_",i)
   
   #append
   logistic_vec <- cbind(logistic_vec, logistic_metrics)
@@ -122,7 +139,12 @@ for (i in 1:length(idx)) {
   lasso_min_vec <- cbind(lasso_min_vec, lasso_min_metrics)
   rpart_vec <- cbind(rpart_vec, rpart_metrics)
   tree_vec <- cbind(tree_vec, tree_metrics)
+  bagg_vec <- cbind(bagg_vec, bagg_metrics)
+  LDA_vec <- cbind(LDA_vec, lda_metrics)
 }
+
+
+
 
 logistic_vec$model <- "logistic"
 ridge_vec$model <- "ridge"
@@ -131,14 +153,19 @@ lasso_min_vec$model <- "lasso_min"
 rpart_vec$model <- "rpart"
 tree_vec$model <- "reg_tree"
 
-all_models <- rbind(logistic_vec, ridge_vec, lasso_LSE_vec,
-                    lasso_min_vec,rpart_vec,tree_vec)
-rownames(all_models) <- NULL
+bagg_vec$model <- "bagging"
+LDA_vec$model <- "LDA"
 
-saveRDS(all_models,"/home/guest/sem_3/707/health_retirement/models_all.rds")
+all_models <- rbind(logistic_vec, ridge_vec, lasso_LSE_vec,
+                    lasso_min_vec,rpart_vec,tree_vec, bagg_vec, 
+                    LDA_vec)
+rownames(all_models) <- NULL
 
 #row wise grouped operations on fold columns:
 all_models$mean_metric = rowMeans(all_models[,grep('^fold_', colnames(all_models))])
+
+
+saveRDS(all_models,"/home/guest/sem_3/707/health_retirement/models_all.rds")
 
 
 #reshape the data: 
@@ -147,5 +174,6 @@ summarydat <- reshape(all_models[,c("metric","model","mean_metric")],
                       idvar = c("model") ,
                       direction = "wide")
 colnames(summarydat) <- sub("mean_metric.", "", colnames(summarydat))
+
 
 saveRDS(summarydat,"/home/guest/sem_3/707/health_retirement/model_summary.rds")

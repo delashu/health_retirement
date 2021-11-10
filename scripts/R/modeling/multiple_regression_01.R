@@ -32,3 +32,4 @@ summary(robust_fit1)
 #################### Quantile Regression ####################
 quant_fit1 <- rq(net_assets ~ ., data = dat)
 summary(quant_fit1)
+#https://support.sas.com/resources/papers/proceedings17/SAS0525-2017.pdf
