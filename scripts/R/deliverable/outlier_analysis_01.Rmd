@@ -33,6 +33,20 @@ length(which(net > 100000000))
 `r 573/16309` is proportion of individuals with more than $100 million in net assets  
 
 
+#### Plot Net Assets  
+
+```{r}
+sortnet <- sort(net)
+plot(x=c(1:length(net)),
+     y = sortnet, pch = 16, cex = 0.5, 
+     main = "Net Assets sorted along the X axis", 
+     xlab = "Individual", xaxt='n',
+     ylab = "Net Assets in USD")
+```
+
+
+
+
 
 ### Top Net Assets   
 ```{r}

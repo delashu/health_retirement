@@ -78,7 +78,7 @@ fulltrain <- fulltrain %>%
 df_tr <- data.frame(lapply(fulltrain, function(x) as.numeric(as.character(x))))
 #bind the two dataframes together
 df_tr <- cbind(df_tr, dumdat)
-
+#saveRDS(df_tr, file = "/home/guest/sem_3/707/health_retirement/model_matrix_training.RDS")
 #then scale the data
 df <- scale(df_tr)
 #the data is now ready to be used for hierarchical clustering
