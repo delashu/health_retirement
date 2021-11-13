@@ -1,0 +1,116 @@
+---
+title: "Crosse validated model selection for SVM"
+author: "Caihan Wang"
+date: "11/13/2021"
+output: html_document
+---
+
+```{r}
+# Library Packages
+library(tidyverse)
+library(caret)
+library(glmnet)
+library(rpart)
+library(randomForest)
+library(ipred)   
+library(e1071)
+options(scipen = 999)
+```
+
+```{r}
+# Set working directory
+setwd("~/Desktop/duke courses/707/aging project")
+#read in training dataset
+train <- readRDS("HRSdat_mice_rf01.rds")
+```
+
+Build cross validation framework: 
+
+```{r}
+set.seed(11+12+2021)
+idx <- createFolds(train$retirement, k = 10)
+#sapply(idx, length)
+```
+
+```{r}
+baseframe <- data.frame(
+  metric = c("Accuracy","Kappa","AccuracyLower","AccuracyUpper","AccuracyNull",
+             "AccuracyPValue","McnemarPValue","Sensitivity","Specificity","Pos Pred Value",
+             "Neg Pred Value","Precision","Recall","F1","Prevalence","Detection Rate",
+             "Detection Prevalence","Balanced Accuracy"   )
+)
+SVM_vec_poly <- baseframe
+SVM_vec_radial <- baseframe
+SVM_vec_sigmoid <- baseframe
+```
+
+
+```{r}
+for (i in 1:length(idx)) {
+   ################ set up k-fold training and test sets
+    #set training data
+   train_dat <- train[as.numeric(unlist(idx[setdiff(c(1:length(idx)), i)])), ]
+   #set training data
+   test_dat <- train[idx[[i]],]
+   
+   # Train SVM model
+   SVM_fit_poly <- svm(retirement~., data = train_dat, kernel = "polynomial", type = 'C-classification', scale = FALSE)
+   SVM_fit_radial <- svm(retirement~., data = train_dat, kernel = "radial", type = 'C-classification', scale = FALSE)
+   SVM_fit_sigmoid <- svm(retirement~., data = train_dat, kernel = "sigmoid", type = 'C-classification', scale = FALSE)
+   
+   # Predict
+   SVM_predict_poly <- predict(SVM_fit_poly, test_dat %>% dplyr::select(-retirement))
+   SVM_predict_radial <- predict(SVM_fit_radial, test_dat %>% dplyr::select(-retirement))
+   SVM_predict_sigmoid <- predict(SVM_fit_sigmoid, test_dat %>% dplyr::select(-retirement))
+   
+   # Evaluation Matrix
+   SVM_mat_poly <-confusionMatrix(factor(SVM_predict_poly), factor(test_dat$retirement))
+   SVM_mat_radial <-confusionMatrix(factor(SVM_predict_radial), factor(test_dat$retirement))
+   SVM_mat_sigmoid <-confusionMatrix(factor(SVM_predict_sigmoid), factor(test_dat$retirement))
+   
+   # Vectorization
+   SVM_metrics_poly <- data.frame(c(SVM_mat_poly$overall, SVM_mat_poly$byClass))
+   names(SVM_metrics_poly) <- paste0("fold_",i)
+   SVM_metrics_radial <- data.frame(c(SVM_mat_radial$overall, SVM_mat_radial$byClass))
+   names(SVM_metrics_radial) <- paste0("fold_",i)
+   SVM_metrics_sigmoid <- data.frame(c(SVM_mat_sigmoid$overall, SVM_mat_sigmoid$byClass))
+   names(SVM_metrics_sigmoid) <- paste0("fold_",i)
+   
+   # append
+   SVM_vec_poly <- cbind(SVM_vec_poly, SVM_metrics_poly)
+   SVM_vec_radial <- cbind(SVM_vec_radial, SVM_metrics_radial)
+   SVM_vec_sigmoid <- cbind(SVM_vec_sigmoid, SVM_metrics_sigmoid)
+   
+}
+```
+
+```{r}
+# Get the result 
+SVM_vec_poly$model <- "SVM polynomial"
+SVM_vec_radial$model <- "SVM radial"
+SVM_vec_sigmoid$model <- "SVM sigmoid"
+
+all_models_SVM <- rbind(SVM_vec_poly, SVM_vec_radial, SVM_vec_sigmoid)
+
+rownames(all_models_SVM) <- NULL
+#row wise grouped operations on fold columns:
+all_models_SVM$mean_metric = rowMeans(all_models_SVM[,grep('^fold_', colnames(all_models_SVM))])
+#reshape the data: 
+summarydat_SVM <- reshape(all_models_SVM[,c("metric","model","mean_metric")], 
+                      timevar = c("metric"),
+                      idvar = c("model") ,
+                      direction = "wide")
+colnames(summarydat_SVM) <- sub("mean_metric.", "", colnames(summarydat_SVM))
+```
+
+```{r}
+summarydat_SVM
+saveRDS(summarydat_SVM, file = "Summarydat_SVM.rds")
+```
+```{r}
+readRDS("Summarydat_SVM.rds")
+```
+
+
+
+
