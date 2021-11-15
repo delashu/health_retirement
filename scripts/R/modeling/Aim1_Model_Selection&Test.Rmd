@@ -1,0 +1,99 @@
+---
+title: "Model_Selection&Test"
+author: "Caihan Wang, Yifeng Tang"
+date: "11/14/2021"
+output: html_document
+---
+
+This R code is to: 
+  1. Select the best model by the summary of model selection
+  2. Use the best model to fit and apply on the test set
+
+
+```{r}
+setwd("~/Desktop/duke courses/707/aging project")
+```
+
+```{r}
+# read in data
+summary_dat <- readRDS("Summarydat.rds")
+summarydat_SVM <- readRDS("Summarydat_SVM.rds")
+```
+
+```{r}
+# choose some index 
+result <- rbind(summarydat, summarydat_SVM) %>%
+  select(model, Accuracy, Sensitivity, Specificity, Precision)
+
+```
+
+---------------------------Clean Summary Table-----------------------------------
+
+```{r}
+# remove SVM sigmnoid (has NA)
+result <- result[1:10,]
+```
+
+
+```{r}
+# Create Rank columns
+result <- result %>% arrange(desc(Accuracy)) %>% mutate(Accuracy_rank = c(1:10))
+result <- result %>% arrange(desc(Sensitivity)) %>% mutate(Sensitivity_rank = c(1:10))
+result <- result %>% arrange(desc(Specificity)) %>% mutate(Specificity_rank = c(1:10))
+result <- result %>% arrange(desc(Precision)) %>% mutate(Precision_rank = c(1:10))
+```
+
+```{r}
+# Create a weight rank columns and sort by weight rank
+result <- result %>% 
+  mutate(Weight_Rank = (Accuracy_rank + Sensitivity_rank + Specificity_rank + Precision_rank)/4) %>% 
+  arrange(Weight_Rank)
+```
+
+```{r}
+# Round the data
+result$Accuracy <- round(result$Accuracy, 3)
+result$Sensitivity <- round(result$Sensitivity, 3)
+result$Specificity <- round(result$Specificity, 3)
+result$Precision <- round(result$Precision, 3)
+```
+
+We use new column: weight rank to evaluate the models and the best one is Random Forest!
+
+```{r}
+# Write Table
+write.csv(result, file ="Model_Select_Result.csv", row.names = FALSE)
+```
+
+
+------------------------Prediction on Test set-------------------------
+
+```{r}
+# read in train and test set
+train <- readRDS("HRSdat_mice_rf01.rds")
+test <- readRDS("test_001HRS.rds")
+```
+
+```{r}
+# Use whole train set to fit the random forest model
+tree_final_fit <- randomForest(retirement ~ ., data = train,method = "class")
+```
+
+```{r}
+# Predict in test set
+tree_final_pred <- predict(tree_final_fit, test %>% dplyr::select(-retirement), type = "class")
+```
+
+```{r}
+# Get the result
+tree_final_mat <-confusionMatrix(factor(tree_final_pred), factor(test$retirement))
+tree_final_mat
+```
+
+
+
+
+
+
+
+
