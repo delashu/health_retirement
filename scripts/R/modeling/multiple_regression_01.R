@@ -120,16 +120,16 @@ medicare, depression, memoryPOOR
 "
 #remove the variables from the LASSO output
 reducedat1 <- dat %>% 
-  select(-c(enjoy_life_pw, retirement, depression, medicare, days_in_bed, 
+  dplyr::select(-c(enjoy_life_pw, retirement, depression, medicare, days_in_bed, 
            lonely_pw, social_security, have_friends)) %>% 
   data.frame()
 
 reducedat2 <- dat %>% 
-  select(-c(retirement, lonely_pw, medicare, days_in_bed, children, 
+  dplyr::select(-c(retirement, lonely_pw, medicare, days_in_bed, children, 
             enjoy_life_pw, social_security, depression, have_friends)) %>% 
   data.frame()
 reducedat3 <- dat %>% 
-  select(-c(difficulty_managing_mny, social_security, high_BP, enjoy_life_pw, 
+  dplyr::select(-c(difficulty_managing_mny, social_security, high_BP, enjoy_life_pw, 
             children, days_in_bed, have_friends, lonely_pw, medicare,
             depression)) %>% 
   data.frame()
