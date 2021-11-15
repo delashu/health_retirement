@@ -13,6 +13,7 @@ library(cluster)    # clustering algorithms
 library(factoextra) # clustering visualization
 library(dendextend) # for comparing two dendrograms
 options(scipen = 999)
+set.seed(1125)
 ```
 
 ```{r}
@@ -89,7 +90,6 @@ df <- scale(df_tr)
 
 ### Hierarchical Clustering
   
-#### Complete Linkage  
 ```{r, fig.width=10, fig.height=8}
 # Dissimilarity matrix
 dismat <- dist(df, method = "euclidean")
@@ -100,8 +100,7 @@ plot(hc_complete, cex = 0.6, hang = -1, main = "Cluster Dendrogram\nComplete Euc
      xlab = "")
 rect.hclust(hc_complete, k = 4)
 ```
-
-#### Average Linkage  
+  
   
 ```{r, fig.width=10, fig.height=8}
 #Hclust via Average Linkage
@@ -112,8 +111,7 @@ plot(hc_avg, cex = 0.6, hang = -1, main = "Cluster Dendrogram\nAverage Euclidean
 rect.hclust(hc_avg, k = 4)
 ```
 
-
-#### Single Linkage  
+  
   
 ```{r, fig.width=10, fig.height=8}
 #Hclust via Average Linkage
@@ -123,8 +121,8 @@ plot(hc_single, cex = 0.6, hang = -1, main = "Cluster Dendrogram\nSingle Euclide
      xlab = "")
 rect.hclust(hc_single, k = 4)
 ```
-
-
+  
+  
 ```{r, fig.width=10, fig.height=8}
 ward_den <- hclust(dismat, method = "ward.D2")
 #plot dendrogram 

@@ -4,7 +4,7 @@ library(glmnet)
 library(rpart)
 library(randomForest)
 library(ipred)   
-#library(e1071)
+library(e1071)
 options(scipen = 999)
 
 set.seed(11+8+2021)
@@ -28,6 +28,10 @@ rpart_vec <- baseframe
 tree_vec <- baseframe
 LDA_vec <- baseframe
 bagg_vec <- baseframe
+SVM_vec_poly <- baseframe
+SVM_vec_radial <- baseframe
+SVM_vec_sigmoid <- baseframe
+
 
 
 for (i in 1:length(idx)) {
@@ -84,8 +88,10 @@ for (i in 1:length(idx)) {
   #LDA fit 
   lda_fit <- MASS::lda(retirement ~ ., data = train_dat)
   #SVM fit 
-  #    svm_fit <- svm(Y~., data = X, kernel = "linear", scale = FALSE)
-  #stacking fit
+  SVM_fit_poly <- svm(retirement~., data = train_dat, kernel = "polynomial", type = 'C-classification', scale = FALSE)
+  SVM_fit_radial <- svm(retirement~., data = train_dat, kernel = "radial", type = 'C-classification', scale = FALSE)
+  SVM_fit_sigmoid <- svm(retirement~., data = train_dat, kernel = "sigmoid", type = 'C-classification', scale = FALSE)
+  
   
   
   ################ Predictions
@@ -101,6 +107,9 @@ for (i in 1:length(idx)) {
   lasso_min_predict <- predict(lasso_min_model,x_test_mat,type="class")
   bagg_pred <- predict(bagg_fit, test_dat, type = "class")
   lda_pred<- predict(lda_fit, test_dat, type = "class")[["class"]]
+  SVM_predict_poly <- predict(SVM_fit_poly, test_dat %>% dplyr::select(-retirement))
+  SVM_predict_radial <- predict(SVM_fit_radial, test_dat %>% dplyr::select(-retirement))
+  SVM_predict_sigmoid <- predict(SVM_fit_sigmoid, test_dat %>% dplyr::select(-retirement))
   
   
   ################ Evaluation Metrics
@@ -113,6 +122,9 @@ for (i in 1:length(idx)) {
   tree_mat <-confusionMatrix(factor(tree_pred), factor(test_dat$retirement))
   bagg_mat <- confusionMatrix(factor(bagg_pred), factor(test_dat$retirement))
   lda_mat <- confusionMatrix(factor(lda_pred), factor(test_dat$retirement))
+  SVM_mat_poly <-confusionMatrix(factor(SVM_predict_poly), factor(test_dat$retirement))
+  SVM_mat_radial <-confusionMatrix(factor(SVM_predict_radial), factor(test_dat$retirement))
+  SVM_mat_sigmoid <-confusionMatrix(factor(SVM_predict_sigmoid), factor(test_dat$retirement))
   
   ################ Vectorization
   logistic_metrics <- data.frame(c(log_mat$overall, log_mat$byClass))
@@ -131,6 +143,12 @@ for (i in 1:length(idx)) {
   names(bagg_metrics) <- paste0("fold_",i)
   lda_metrics <- data.frame(c(lda_mat$overall, lda_mat$byClass))
   names(lda_metrics) <- paste0("fold_",i)
+  SVM_metrics_poly <- data.frame(c(SVM_mat_poly$overall, SVM_mat_poly$byClass))
+  names(SVM_metrics_poly) <- paste0("fold_",i)
+  SVM_metrics_radial <- data.frame(c(SVM_mat_radial$overall, SVM_mat_radial$byClass))
+  names(SVM_metrics_radial) <- paste0("fold_",i)
+  SVM_metrics_sigmoid <- data.frame(c(SVM_mat_sigmoid$overall, SVM_mat_sigmoid$byClass))
+  names(SVM_metrics_sigmoid) <- paste0("fold_",i)
   
   #append
   logistic_vec <- cbind(logistic_vec, logistic_metrics)
@@ -141,6 +159,9 @@ for (i in 1:length(idx)) {
   tree_vec <- cbind(tree_vec, tree_metrics)
   bagg_vec <- cbind(bagg_vec, bagg_metrics)
   LDA_vec <- cbind(LDA_vec, lda_metrics)
+  SVM_vec_poly <- cbind(SVM_vec_poly, SVM_metrics_poly)
+  SVM_vec_radial <- cbind(SVM_vec_radial, SVM_metrics_radial)
+  SVM_vec_sigmoid <- cbind(SVM_vec_sigmoid, SVM_metrics_sigmoid)
 }
 
 
@@ -152,20 +173,23 @@ lasso_LSE_vec$model <- "lasso_lse"
 lasso_min_vec$model <- "lasso_min"
 rpart_vec$model <- "rpart"
 tree_vec$model <- "reg_tree"
-
 bagg_vec$model <- "bagging"
 LDA_vec$model <- "LDA"
+SVM_vec_poly$model <- "SVM polynomial"
+SVM_vec_radial$model <- "SVM radial"
+SVM_vec_sigmoid$model <- "SVM sigmoid"
 
 all_models <- rbind(logistic_vec, ridge_vec, lasso_LSE_vec,
                     lasso_min_vec,rpart_vec,tree_vec, bagg_vec, 
-                    LDA_vec)
+                    LDA_vec,
+                    SVM_vec_poly, SVM_vec_radial, SVM_vec_sigmoid)
 rownames(all_models) <- NULL
 
 #row wise grouped operations on fold columns:
 all_models$mean_metric = rowMeans(all_models[,grep('^fold_', colnames(all_models))])
 
 
-saveRDS(all_models,"/home/guest/sem_3/707/health_retirement/models_all.rds")
+saveRDS(all_models,"/home/guest/sem_3/707/health_retirement/models_all_01.rds")
 
 
 #reshape the data: 
@@ -176,4 +200,4 @@ summarydat <- reshape(all_models[,c("metric","model","mean_metric")],
 colnames(summarydat) <- sub("mean_metric.", "", colnames(summarydat))
 
 
-saveRDS(summarydat,"/home/guest/sem_3/707/health_retirement/model_summary.rds")
+saveRDS(summarydat,"/home/guest/sem_3/707/health_retirement/model_summary_01.rds")

@@ -1,0 +1,34 @@
+---
+title: "Aim One: Clustering Table"
+author: "Shu Asai"
+date: "11/13/2021"
+output: pdf_document
+indent: true
+---
+
+```{r, echo = TRUE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message=FALSE)
+library(tidyverse)  # data manipulation
+library(cluster)    # clustering algorithms
+library(factoextra) # clustering visualization
+library(dendextend) # for comparing two dendrograms
+options(scipen = 999)
+set.seed(1125)
+```
+
+
+```{r}
+df <- readRDS("/home/guest/sem_3/707/health_retirement/scripts/R/modeling/dendro_plots/dendrodat.RDS")
+```
+
+
+
+```{r}
+knitr::kable(
+  df,
+  col.names = c("Cluster",'Mean Age', 'Mean Children', 'Mean Net Assets', 'Prop. Male',
+                'Prop. Retired', 'Prop. Married','Prop. Satisfied Life', 'Prop. Good Health'),
+  digits = 3
+)
+```
+

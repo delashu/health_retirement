@@ -1,0 +1,134 @@
+---
+title: "Aim Two: Gradient Boosted Machine"
+author: "Yiyang Zhang & Shusaku Asai"
+date: "11/13/2021"
+output: pdf_document
+indent: true
+---
+
+```{r, echo = TRUE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message=FALSE)
+library(tidyverse)  # data manipulation
+library(cluster)    # clustering algorithms
+library(factoextra) # clustering visualization
+library(dendextend) # for comparing two dendrograms
+library(gbm)
+library(caret)
+options(scipen = 999)
+set.seed(1125)
+```
+
+
+```{r}
+#load in training data
+train <- readRDS(file="/home/guest/sem_3/707/health_retirement/training_001HRS.rds")
+```
+
+```{r}
+#first model just to try and see the result
+model_gbm = gbm(train$net_assets~.,
+                data = train,
+                distribution = "gaussian",
+                interaction.depth = 1,
+                cv.folds = 5,
+                shrinkage = 0.001,
+                n.trees = 10000,
+                n.cores = NULL,
+                verbose = FALSE)
+sqrt(min(model_gbm$cv.error))
+
+print(model_gbm)
+summary(model_gbm)
+```
+
+
+### Try Grid Search  
+```{r}
+# create hyperparameter grid
+hyper_grid <- expand.grid(
+  shrinkage = c(.01, .1, .3),
+  interaction.depth = c(1, 3, 5),
+  n.minobsinnode = c(5, 10, 15),
+  bag.fraction = c(.65, .8, 1), 
+  optimal_trees = 0,     
+  min_RMSE = 0
+)
+
+
+```
+
+
+
+
+```{r}
+sqrt(min(model_gbm$cv.error))
+
+gbm.perf(model_gbm, method = "cv")
+
+# find index for n trees with minimum CV error
+min_MSE <- which.min(model_gbm$cv.error)
+
+# get MSE and compute RMSE
+#sqrt(model_gbm$cv.error[min_MSE])
+## [1] 23112.1
+
+# plot loss function as a result of n trees added to the ensemble
+#gbm.perf(model_gbm, method = "cv")
+
+```
+
+
+
+```{r}
+best.iter <- gbm.perf(asset_gbm,method='cv')
+summary(asset_gbm,best.iter)
+plot.gbm(asset_gbm,1,best.iter)
+#length(pre_train$net_assets)
+#summary(pre_train$net_assets)
+sqrt(min(best_gbm$cv.error))
+
+gbm.perf(best_gbm, method = "cv")
+
+# find index for n trees with minimum CV error
+#min_MSE <- which.min(best_gbm$cv.error)
+
+```
+
+
+
+The final model we choose to use
+```{r }
+#best ietration we should use 
+asset_gbm2=gbm(train$net_assets~.,
+                data = train,
+                distribution = "gaussian",
+                interaction.depth = 1,
+                cv.folds = 5,
+                shrinkage = 0.001,
+                n.trees = 4995,
+                n.cores = NULL,
+                verbose = FALSE)
+```
+
+```{r fig.align="center", echo = FALSE,fig.height = 20}
+print(asset_gbm2)
+summary(asset_gbm2)
+```
+
+```{r}
+# plot loss function as a result of n trees added to the ensemble
+best.iter <- gbm.perf(asset_gbm2,method='cv')
+#summary
+summary(asset_gbm2,best.iter)
+#plot.gbm(asset_gbm2,2,best.iter)
+
+#CV RMSE
+sqrt(min(asset_gbm2$cv.error))
+# plot loss function as a result of n trees added to the ensemble
+#gbm.perf(asset_gbm2, method = "cv")
+
+#find index for n trees with minimum CV error
+#min_MSE <- which.min(asset_gbm2$cv.error)
+```
+
+
