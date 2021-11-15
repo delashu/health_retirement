@@ -1,0 +1,50 @@
+---
+title: "Crosse validated model selection for SVM"
+author: "Shu Asai"
+date: "11/15/2021"
+output: pdf_document
+indent: true
+---
+
+
+```{r, echo = TRUE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message=FALSE)
+library(tidyverse)  # data manipulation
+options(scipen = 999)
+set.seed(1125)
+```
+
+
+### Table output: 
+```{r, echo = FALSE}
+data <- readRDS("~/sem_3/707/health_retirement/model_summary_01.rds")
+dat <- data[,c("model","Accuracy", "Sensitivity","Specificity", 
+               "Precision", "Kappa")]
+rownames(dat) <- NULL
+dat <- dat[-which(dat$model == "SVM sigmoid"),]
+
+
+a <- rank(dat$Accuracy)
+b <- rank(dat$Sensitivity)
+c <- rank(dat$Specificity)
+d <- rank(dat$Precision)
+e <- rank(dat$Kappa)
+rdat <- data.frame(
+  a,b,c,d,e
+)
+
+#rowMeans(rdat, na.rm = FALSE, dims = 1)
+
+dat$'Weighted Rank' <- rowMeans(rdat, na.rm = FALSE, dims = 1)
+dat <- dat[order(-dat$`Weighted Rank`),]
+rownames(dat) <- NULL
+```
+
+
+```{r}
+knitr::kable(
+  dat,
+  digits = 3
+)
+```
+
