@@ -10,13 +10,20 @@ indent: true
 ```{r, echo = TRUE, message=FALSE, warning=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message=FALSE)
 library(tidyverse)  # data manipulation
-options(scipen = 999)
 set.seed(1125)
 ```
 
 
+```{r}
+da <- readRDS("/home/guest/sem_3/707/health_retirement/processed_001HRS.rds")
+summary(da$net_assets)
+```
+
+
+
 ### Table output: 
 ```{r, echo = FALSE}
+options(scipen = 999)
 data <- readRDS("~/sem_3/707/health_retirement/model_summary_01.rds")
 dat <- data[,c("model","Accuracy", "Sensitivity","Specificity", 
                "Precision", "Kappa")]
@@ -44,6 +51,14 @@ rownames(dat) <- NULL
 ```{r}
 knitr::kable(
   dat,
+  digits = 3
+)
+```
+
+```{r, echo = FALSE}
+nd <- readRDS(file = "/home/guest/sem_3/707/health_retirement/scripts/R/deliverable/coef_quantile_reg.rds")
+knitr::kable(
+  nd,
   digits = 3
 )
 ```

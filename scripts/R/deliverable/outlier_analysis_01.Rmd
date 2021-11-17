@@ -22,6 +22,7 @@ dat <- readRDS("../../../training_001HRS_complete.rds")
 ```{r, echo = FALSE}
 net <- dat$net_assets
 summary(net)
+sd(net)
 ```
 
   
@@ -63,7 +64,7 @@ DT::datatable(head(tops,30))
 ```{r, echo = FALSE, fig.width=10, fig.height=8}
 par(mfrow = c(1,2))
 hist(net, main = "Histogram of Total Assets", xlab = "Total Assets, USD")
-boxplot(net, main = "Boxplot of Net Assets")
+boxplot(net, main = "Boxplot of Total Assets")
 ```
 
 

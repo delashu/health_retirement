@@ -26,7 +26,7 @@ df <- readRDS("/home/guest/sem_3/707/health_retirement/scripts/R/modeling/dendro
 ```{r}
 knitr::kable(
   df,
-  col.names = c("Cluster",'Mean Age', 'Mean Children', 'Mean Net Assets', 'Prop. Male',
+  col.names = c("Cluster",'Mean Age', 'Mean Children', 'Mean Total Assets', 'Prop. Male',
                 'Prop. Retired', 'Prop. Married','Prop. Satisfied Life', 'Prop. Good Health'),
   digits = 3
 )

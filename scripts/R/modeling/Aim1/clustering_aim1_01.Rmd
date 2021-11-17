@@ -19,7 +19,7 @@ set.seed(1125)
 ```{r}
 #read in training dataset
 #train <- readRDS("../../../HRSdat_mice_rf01.rds")
-fulltrain <- readRDS("../../../HRSdat_presplit_mice_rf01.rds")
+fulltrain <- readRDS("../../../../HRSdat_presplit_mice_rf01.rds")
 #make copy of original data
 tdf <- fulltrain
 ```
@@ -166,7 +166,7 @@ tdf_analysis <- tdf %>%
 
 knitr::kable(
   tdf_analysis,
-  col.names = c("Cluster",'Mean Age', 'Mean Children', 'Mean Net Assets', 'Prop Male',
+  col.names = c("Cluster",'Mean Age', 'Mean Children', 'Mean Total Assets', 'Prop Male',
                 'Prop Retired', 'Prop Married','Prop Satisfied Life', 'Prop Good Health'),
   digits = 3
 )
