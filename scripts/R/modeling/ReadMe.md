@@ -1,1 +1,1 @@
-# Modeling folder contains code for aim1 and aim2. Please reach the corresponding folder to access the code. 
+### Find modeling code for Aim 1 and Aim 2 in each corresponding folder.  
