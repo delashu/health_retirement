@@ -62,8 +62,8 @@ DT::datatable(head(tops,30))
   
 ```{r, echo = FALSE, fig.width=10, fig.height=8}
 par(mfrow = c(1,2))
-hist(net)
-boxplot(net)
+hist(net, main = "Histogram of Total Assets", xlab = "Total Assets, USD")
+boxplot(net, main = "Boxplot of Net Assets")
 ```
 
 
